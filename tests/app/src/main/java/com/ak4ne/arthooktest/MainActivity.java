@@ -19,6 +19,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.ak4ne.arthooktest.testkit.TestResult;
 import com.ak4ne.arthooktest.testkit.TestRunner;
@@ -51,7 +55,20 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         setContentView(R.layout.activity_main);
+
+        // Edge-to-edge is forced on Android 15+; inset the root by the system
+        // bars (+ cutout) so they don't overlap the summary and buttons.
+        View root = findViewById(R.id.root);
+        final int pl = root.getPaddingLeft(), pt = root.getPaddingTop(),
+                  pr = root.getPaddingRight(), pb = root.getPaddingBottom();
+        ViewCompat.setOnApplyWindowInsetsListener(root, (v, insets) -> {
+            Insets bars = insets.getInsets(
+                    WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
+            v.setPadding(pl + bars.left, pt + bars.top, pr + bars.right, pb + bars.bottom);
+            return insets;
+        });
 
         summary   = findViewById(R.id.summary);
         log       = findViewById(R.id.log);
